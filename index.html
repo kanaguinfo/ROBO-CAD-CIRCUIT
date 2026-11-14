@@ -1,0 +1,2898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ROBO-CAD-CIRCUIT V22 PRO</title>
+
+<style>
+:root{
+ --bg:#06101d;
+ --panel:#10273c;
+ --card:#17364c;
+ --text:#e9faff;
+ --cyan:#00eaff;
+ --green:#4dffae;
+ --line:#41677d;
+ --gold:#ffdc65;
+}
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ background:var(--bg);
+ color:var(--text);
+ font-family:Arial,sans-serif;
+ overflow-x:hidden;
+}
+
+button,select,input{
+ background:#193d54;
+ color:white;
+ border:1px solid #4a7890;
+ padding:9px;
+ border-radius:7px;
+ cursor:pointer;
+}
+button:hover{border-color:var(--cyan)}
+button.active{background:#007f9d}
+h1,h2,h3{color:var(--cyan)}
+
+/* INTRO */
+
+#intro{
+ position:fixed;
+ inset:0;
+ background:radial-gradient(circle at center,#103451,#020710 75%);
+ z-index:100;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ overflow:hidden;
+}
+
+#stars{
+ position:absolute;
+ inset:0;
+ pointer-events:none;
+}
+
+.star{
+ position:absolute;
+ width:2px;
+ height:2px;
+ background:white;
+ border-radius:50%;
+ animation:twinkle 2s infinite alternate;
+}
+
+@keyframes twinkle{
+ from{opacity:.15;transform:scale(.6)}
+ to{opacity:1;transform:scale(1.7)}
+}
+
+.introContent{
+ position:relative;
+ text-align:center;
+ padding:20px;
+ max-width:750px;
+}
+
+.logo{
+ font-size:65px;
+ animation:float 3s infinite ease-in-out;
+ filter:drop-shadow(0 0 20px cyan);
+}
+
+@keyframes float{
+ 50%{transform:translateY(-15px)}
+}
+
+.introTitle{
+ font-size:clamp(25px,5vw,54px);
+ color:#55f4ff;
+ text-shadow:0 0 25px #00cfff;
+ letter-spacing:3px;
+}
+
+.introSub{
+ color:#a4d8ed;
+ letter-spacing:4px;
+}
+
+.loading{
+ width:min(400px,80vw);
+ height:12px;
+ border:1px solid #6edcff;
+ border-radius:20px;
+ overflow:hidden;
+ margin:35px auto;
+ background:#06111c;
+}
+
+.loadingBar{
+ height:100%;
+ width:0%;
+ background:linear-gradient(90deg,#00cfff,#69ffb1);
+ box-shadow:0 0 20px cyan;
+ transition:width .1s;
+}
+
+#loadingText{color:#a9dbe9;font-size:13px}
+
+#enterButton{
+ display:none;
+ font-size:18px;
+ padding:15px 35px;
+ background:#0086a6;
+ border:2px solid cyan;
+ box-shadow:0 0 20px #0085aa;
+}
+
+/* HEADER */
+
+header{
+ background:#10283d;
+ border-bottom:2px solid var(--cyan);
+ padding:14px;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ flex-wrap:wrap;
+ gap:10px;
+}
+
+header strong{
+ color:var(--cyan);
+ font-size:22px;
+}
+
+.badge{
+ border:1px solid #4a778a;
+ border-radius:20px;
+ padding:6px 12px;
+ font-size:12px;
+}
+
+/* HOME */
+
+#home{
+ padding:25px;
+ text-align:center;
+}
+
+#boardList{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+ gap:12px;
+ max-width:1200px;
+ margin:25px auto;
+}
+
+.boardCard{
+ background:linear-gradient(145deg,#1a4158,#10283a);
+ border:1px solid #426e85;
+ padding:20px 10px;
+ border-radius:13px;
+ cursor:pointer;
+ transition:.2s;
+}
+
+.boardCard:hover{
+ transform:translateY(-5px);
+ border-color:cyan;
+ box-shadow:0 0 20px #0084aa55;
+}
+
+.boardIcon{
+ font-size:35px;
+ margin-bottom:10px;
+}
+
+/* APP */
+
+#app{display:none}
+
+#toolbar{
+ background:#10283d;
+ padding:10px;
+ display:flex;
+ flex-wrap:wrap;
+ align-items:center;
+ gap:5px;
+}
+
+#viewport{
+ height:59vh;
+ min-height:440px;
+ overflow:auto;
+ background-color:#081b2b;
+ background-image:
+ linear-gradient(#1d3446 1px,transparent 1px),
+ linear-gradient(90deg,#1d3446 1px,transparent 1px);
+ background-size:25px 25px;
+}
+
+#stage{
+ position:relative;
+ width:2400px;
+ height:1800px;
+ transform-origin:0 0;
+}
+
+#wireLayer{
+ position:absolute;
+ inset:0;
+ width:2400px;
+ height:1800px;
+ pointer-events:none;
+}
+
+.part{
+ position:absolute;
+ background:#16475b;
+ border:2px solid #52c6db;
+ border-radius:12px;
+ padding:12px;
+ width:205px;
+ text-align:center;
+ user-select:none;
+ touch-action:none;
+ cursor:grab;
+}
+
+.part.board{
+ width:390px;
+ background:#103d34;
+ border-color:#53d6a4;
+}
+
+.part.selected{outline:3px solid var(--gold)}
+
+.partTitle{
+ font-size:15px;
+ font-weight:bold;
+ margin:9px 0;
+}
+
+.boardBody{
+ background:linear-gradient(135deg,#087f69,#07533f);
+ border:3px solid #59d5ab;
+ border-radius:12px;
+ min-height:125px;
+ margin:8px auto;
+ position:relative;
+ padding:15px;
+}
+
+.chip{
+ display:inline-block;
+ background:#18242c;
+ border:2px solid #708a97;
+ border-radius:6px;
+ padding:22px 12px;
+ margin:15px;
+ font-size:12px;
+}
+
+.usb{
+ position:absolute;
+ top:25px;
+ left:-10px;
+ background:#ccd8e0;
+ color:#17242d;
+ padding:8px;
+ border-radius:5px;
+ font-size:10px;
+}
+
+.batteryGraphic{
+ width:110px;
+ height:125px;
+ margin:15px auto;
+ border:3px solid #cedee8;
+ border-radius:10px;
+ background:linear-gradient(135deg,#596e7e,#1b2731);
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ flex-direction:column;
+ position:relative;
+}
+
+.batteryGraphic:before{
+ content:"";
+ position:absolute;
+ top:-12px;
+ width:34px;
+ height:10px;
+ background:#c9dce8;
+ border-radius:4px 4px 0 0;
+}
+
+.batteryGraphic b{
+ color:#54ffae;
+ font-size:28px;
+}
+
+.pinout{
+ background:#092638;
+ border:1px solid #497b91;
+ padding:10px;
+ border-radius:9px;
+ margin-top:10px;
+ text-align:left;
+}
+
+.pinout h4{
+ color:#6deaff;
+ margin:3px 0 8px;
+}
+
+.pinout small{
+ display:block;
+ color:#a9cbdc;
+ margin-bottom:7px;
+}
+
+.pinGroup{
+ padding:7px;
+ margin:6px 0;
+ background:#133447;
+ border-radius:6px;
+}
+
+.pinGroup strong{
+ color:#b6edff;
+ font-size:11px;
+}
+
+.pin{
+ display:inline-block;
+ padding:6px;
+ min-width:32px;
+ margin:3px;
+ border-radius:5px;
+ background:#ffdc77;
+ color:#15232b;
+ font-size:11px;
+ cursor:pointer;
+ border:1px solid #ffe8a1;
+}
+
+.pin.power{background:#ff7777;color:white}
+.pin.ground{background:#647484;color:white}
+.pin.analog{background:#b9a1ff}
+.pin.bus{background:#83dfff}
+
+.pin.target{
+ background:#fff;
+ outline:2px solid yellow;
+ box-shadow:0 0 12px yellow;
+ animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+ 50%{box-shadow:0 0 3px yellow}
+}
+
+.pin.chosen{background:#55ffac}
+
+.piGrid{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:3px;
+}
+
+.piCell{
+ display:flex;
+ align-items:center;
+ gap:4px;
+ min-width:0;
+}
+
+.piCell .pin{
+ flex:1;
+ min-width:0;
+ text-align:center;
+ margin:0;
+}
+
+.piNumber{
+ font-size:10px;
+ width:19px;
+ text-align:center;
+}
+
+.ledBulb{
+ width:55px;
+ height:55px;
+ border:4px solid #a8b9c6;
+ border-radius:50%;
+ background:#452b2c;
+ margin:15px auto;
+}
+
+.ledBulb.on{
+ background:var(--led-color,#ff3333);
+ box-shadow:0 0 30px var(--led-color,#ff3333);
+}
+
+.resistorGraphic{
+ width:110px;
+ height:24px;
+ border-radius:12px;
+ margin:15px auto;
+ background:repeating-linear-gradient(
+ 90deg,#e7c59a 0 20px,#704522 20px 25px,
+ #e7c59a 25px 45px,#e44 45px 50px
+ );
+}
+
+.componentIcon{
+ font-size:36px;
+ margin:12px;
+}
+
+/* DASHBOARD */
+
+#bottom{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:12px;
+ padding:12px;
+}
+
+.panel{
+ background:var(--panel);
+ border:1px solid var(--line);
+ border-radius:12px;
+ padding:15px;
+}
+
+.panel h3{
+ margin-top:0;
+}
+
+#guideText{
+ font-size:16px;
+ line-height:1.6;
+ min-height:55px;
+}
+
+#progress{color:var(--green)}
+
+#simText{
+ color:var(--green);
+ font-size:17px;
+}
+
+#electrical{
+ white-space:pre-wrap;
+ line-height:1.6;
+}
+
+#achievements{
+ display:flex;
+ flex-wrap:wrap;
+ gap:8px;
+}
+
+.achievement{
+ background:#174534;
+ border:1px solid #4fe9a2;
+ padding:7px 10px;
+ border-radius:20px;
+ font-size:12px;
+}
+
+#toast{
+ position:fixed;
+ bottom:20px;
+ right:20px;
+ background:#17445b;
+ border:1px solid cyan;
+ border-radius:9px;
+ padding:15px;
+ display:none;
+ z-index:200;
+ max-width:350px;
+}
+
+/* SECRET THEMES */
+
+body.rainbow{
+ --cyan:#ff71ec;
+ --green:#fff56b;
+ --panel:#30144e;
+ --card:#4c215b;
+ --line:#a357dc;
+}
+
+body.rainbow .part{
+ animation:rainbowGlow 4s linear infinite;
+}
+
+@keyframes rainbowGlow{
+ 0%{border-color:red}
+ 20%{border-color:yellow}
+ 40%{border-color:lime}
+ 60%{border-color:cyan}
+ 80%{border-color:magenta}
+ 100%{border-color:red}
+}
+
+body.matrix{
+ --bg:#000900;
+ --panel:#001b08;
+ --card:#003b10;
+ --text:#8bff9e;
+ --cyan:#00ff41;
+ --green:#00ff41;
+ --line:#008f25;
+ font-family:monospace;
+}
+
+body.matrix #viewport{
+ background-color:#000c03;
+ background-image:
+ linear-gradient(#0c2d13 1px,transparent 1px),
+ linear-gradient(90deg,#0c2d13 1px,transparent 1px);
+}
+
+#developerPanel{
+ display:none;
+ position:fixed;
+ top:75px;
+ right:15px;
+ width:310px;
+ max-width:90vw;
+ background:#112e44;
+ border:2px solid cyan;
+ border-radius:12px;
+ padding:16px;
+ z-index:80;
+ box-shadow:0 0 30px #00aacc66;
+}
+
+#developerPanel h3{margin-top:0}
+
+#developerPanel button{
+ margin:4px;
+}
+
+#warning{
+ margin:12px;
+ padding:12px;
+ background:#48371f;
+ border-radius:8px;
+ color:#ffe3a6;
+ font-size:12px;
+ line-height:1.5;
+}
+
+@media(max-width:750px){
+ #bottom{grid-template-columns:1fr}
+ header strong{font-size:17px}
+}
+</style>
+</head>
+
+<body>
+
+<!-- STARTUP INTRO -->
+
+<div id="intro">
+ <div id="stars"></div>
+
+ <div class="introContent">
+  <div class="logo">⚡🤖</div>
+
+  <h1 class="introTitle">ROBO-CAD-CIRCUIT</h1>
+
+  <h3>V22 PRO</h3>
+
+  <p class="introSub">SECRET EDITION</p>
+
+  <div class="loading">
+   <div id="loadingBar" class="loadingBar"></div>
+  </div>
+
+  <p id="loadingText">Initializing circuit engine...</p>
+
+  <button id="enterButton" onclick="enterApp()">
+   🚀 ENTER ROBO-CAD
+  </button>
+ </div>
+</div>
+
+<header>
+ <strong>⚡ ROBO-CAD-CIRCUIT V22 PRO</strong>
+
+ <span class="badge">18 PROJECTS</span>
+ <span class="badge">GUIDED BUILDER</span>
+ <span class="badge">SECRET EDITION</span>
+
+ <button onclick="showSecrets()">🔐 Secrets</button>
+</header>
+
+<!-- BOARD SELECTION -->
+
+<section id="home">
+ <h2>Choose Your Electronics Board</h2>
+
+ <p>Build, connect, experiment and discover.</p>
+
+ <input
+  id="boardSearch"
+  placeholder="🔎 Search boards..."
+  oninput="renderBoards()"
+ >
+
+ <div id="boardList"></div>
+</section>
+
+<!-- MAIN APP -->
+
+<section id="app">
+
+ <div id="toolbar">
+
+  <button onclick="goHome()">🏠 Boards</button>
+
+  <select id="projectSelect" onchange="startProject()"></select>
+
+  <button id="moveButton" class="active"
+   onclick="setMode('move')">✋ Move</button>
+
+  <button id="wireButton"
+   onclick="setMode('wire')">🔌 Wire</button>
+
+  <button onclick="play()">▶ Play</button>
+  <button onclick="stop()">■ Stop</button>
+
+  <button onclick="undo()">↶ Undo</button>
+  <button onclick="redo()">↷ Redo</button>
+
+  <button onclick="deleteSelected()">🗑 Delete</button>
+
+  <button onclick="zoomBy(1.2)">🔍 +</button>
+  <button onclick="zoomBy(1/1.2)">🔎 −</button>
+
+  <select id="componentSelect" onchange="addSelected()">
+   <option value="">+ Add Component</option>
+  </select>
+
+  <select id="wireColor">
+   <option value="#00e5ff">Blue Wire</option>
+   <option value="#ff4444">Red Wire</option>
+   <option value="#00ff88">Green Wire</option>
+   <option value="#ffcc00">Yellow Wire</option>
+  </select>
+
+  <button onclick="checkCircuit()">🧪 Check</button>
+
+  <button onclick="saveCircuit()">💾 Save</button>
+  <button onclick="loadCircuit()">📂 Load</button>
+
+  <button onclick="exportCircuit()">📤 Export</button>
+  <button onclick="$('importFile').click()">📥 Import</button>
+
+  <input
+   id="importFile"
+   type="file"
+   accept=".json"
+   style="display:none"
+   onchange="importCircuit(event)"
+  >
+
+  <select id="language" onchange="changeLanguage()">
+   <option value="en-US">🇺🇸 English</option>
+   <option value="ta-IN">🇮🇳 Tamil</option>
+   <option value="hi-IN">🇮🇳 Hindi</option>
+   <option value="te-IN">🇮🇳 Telugu</option>
+   <option value="ml-IN">🇮🇳 Malayalam</option>
+   <option value="kn-IN">🇮🇳 Kannada</option>
+   <option value="fr-FR">🇫🇷 French</option>
+   <option value="es-ES">🇪🇸 Spanish</option>
+   <option value="de-DE">🇩🇪 German</option>
+   <option value="ja-JP">🇯🇵 Japanese</option>
+  </select>
+
+  <button id="voiceButton" onclick="toggleVoice()">
+   🔊 Voice ON
+  </button>
+
+  <button onclick="repeatGuide()">🗣 Repeat</button>
+
+ </div>
+
+ <div id="viewport">
+  <div id="stage">
+   <svg id="wireLayer"></svg>
+  </div>
+ </div>
+
+ <div id="bottom">
+
+  <div class="panel">
+   <h3>🤖 Guided Circuit Builder</h3>
+
+   <p id="progress"></p>
+
+   <p id="guideText"></p>
+
+   <button onclick="previousStep()">⬅ Previous</button>
+   <button onclick="nextStep()">Next ➡</button>
+   <button onclick="currentStep()">🎯 Current</button>
+
+   <p id="checkResult"></p>
+  </div>
+
+  <div class="panel">
+   <h3>🎮 Simulation</h3>
+
+   <p id="simText">Select a project to begin.</p>
+
+   <div id="simControls"></div>
+
+   <h3>⚡ Electrical Dashboard</h3>
+   <div id="electrical"></div>
+  </div>
+
+  <div class="panel">
+   <h3>🏆 Achievements</h3>
+   <div id="achievements"></div>
+  </div>
+
+  <div class="panel">
+   <h3>📊 Circuit Statistics</h3>
+   <div id="statistics"></div>
+  </div>
+
+ </div>
+
+ <div id="warning">
+  The pinout panel is part of the original board or battery,
+  not a separate component. Arduino UNO R3 and Raspberry Pi
+  header labels are based on their standard pin assignments.
+  Other board layouts are simplified educational representations.
+  Simulations are demonstrations and do not verify physical
+  wiring safety.
+ </div>
+
+</section>
+
+<!-- SECRET DEVELOPER PANEL -->
+
+<div id="developerPanel">
+ <h3>🔐 SECRET DEVELOPER MODE</h3>
+
+ <p>Welcome to the hidden control center!</p>
+
+ <button onclick="activateRainbow()">🌈 Rainbow</button>
+ <button onclick="activateMatrix()">🟢 Matrix</button>
+ <button onclick="resetTheme()">🌌 Normal</button>
+
+ <button onclick="unlockAllAchievements()">
+  🏆 Unlock Achievements
+ </button>
+
+ <button onclick="showStats()">📊 Statistics</button>
+
+ <button onclick="showSecrets()">❌ Close</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+
+const $=id=>document.getElementById(id);
+
+/* =========================================
+   INTRO ANIMATION
+========================================= */
+
+function createStars(){
+ const root=$("stars");
+
+ for(let i=0;i<100;i++){
+  const star=document.createElement("div");
+  star.className="star";
+  star.style.left=Math.random()*100+"%";
+  star.style.top=Math.random()*100+"%";
+  star.style.animationDelay=Math.random()*3+"s";
+  root.appendChild(star);
+ }
+}
+
+let loadingProgress=0;
+
+function startIntro(){
+ createStars();
+
+ const messages=[
+  "Initializing circuit engine...",
+  "Loading electronic components...",
+  "Preparing guided wiring...",
+  "Activating virtual simulation...",
+  "Checking secret systems...",
+  "ROBO-CAD ready!"
+ ];
+
+ const timer=setInterval(()=>{
+  loadingProgress=Math.min(100,loadingProgress+4);
+
+  $("loadingBar").style.width=loadingProgress+"%";
+
+  const index=Math.min(
+   messages.length-1,
+   Math.floor(loadingProgress/20)
+  );
+
+  $("loadingText").textContent=messages[index];
+
+  if(loadingProgress>=100){
+   clearInterval(timer);
+   $("enterButton").style.display="inline-block";
+  }
+ },65);
+}
+
+function enterApp(){
+ $("intro").style.display="none";
+ toast("🚀 Welcome to ROBO-CAD V22 PRO!");
+ unlock("Explorer");
+}
+
+/* =========================================
+   BOARD CATALOG
+   SAME 40 BOARD SELECTIONS
+========================================= */
+
+const boards=[
+ ["Basic Electronics","🔋","basic"],
+ ["Arduino UNO R3","🟦","uno"],
+ ["Arduino UNO R4 Minima","🟦","arduino"],
+ ["Arduino UNO R4 WiFi","🟦","arduino"],
+ ["Arduino Nano","🟦","arduino"],
+ ["Arduino Nano Every","🟦","arduino"],
+ ["Arduino Nano ESP32","🟦","esp32"],
+ ["Arduino Mega 2560","🟦","arduino"],
+ ["Arduino Leonardo","🟦","arduino"],
+ ["Arduino Micro","🟦","arduino"],
+ ["Arduino Pro Mini","🟦","arduino"],
+ ["Arduino Due","🟦","arduino"],
+ ["Arduino MKR WiFi 1010","🟦","arduino"],
+ ["Arduino GIGA R1 WiFi","🟦","arduino"],
+ ["ESP32 DevKit V1","📶","esp32"],
+ ["ESP32-WROOM-32","📶","esp32"],
+ ["ESP32-S3 Super Mini","📶","esp32"],
+ ["ESP32-S3 DevKit","📶","esp32"],
+ ["ESP32-C3 SuperMini","📶","esp32"],
+ ["ESP32-C3 DevKit","📶","esp32"],
+ ["ESP32-C6 DevKit","📶","esp32"],
+ ["ESP32-CAM AI Thinker","📷","esp32"],
+ ["ESP8266 NodeMCU","📶","esp8266"],
+ ["ESP8266 Wemos D1 Mini","📶","esp8266"],
+ ["ESP-01","📶","esp8266"],
+ ["Raspberry Pi 4","🍓","pi"],
+ ["Raspberry Pi 5","🍓","pi"],
+ ["Raspberry Pi 3 B+","🍓","pi"],
+ ["Raspberry Pi Zero 2 W","🍓","pi"],
+ ["Raspberry Pi Pico","🍓","pico"],
+ ["Raspberry Pi Pico W","🍓","pico"],
+ ["Raspberry Pi Pico 2","🍓","pico"],
+ ["Raspberry Pi Pico 2 W","🍓","pico"],
+ ["BBC micro:bit V1","🎮","microbit"],
+ ["BBC micro:bit V2","🎮","microbit"],
+ ["STM32 Blue Pill","🔵","stm32"],
+ ["STM32 Black Pill","⚫","stm32"],
+ ["Seeed XIAO ESP32-C3","🟢","esp32"],
+ ["Seeed XIAO ESP32-S3","🟢","esp32"],
+ ["Adafruit Circuit Playground Express","🌈","microbit"]
+];
+
+const range=(prefix,a,b)=>
+ Array.from({length:b-a+1},(_,i)=>prefix+(a+i));
+
+const pinSets={
+ basic:["+","-"],
+
+ uno:[
+  ...range("D",0,13),
+  ...range("A",0,5),
+  "3V3","5V","GND","VIN",
+  "RESET","AREF","SDA","SCL"
+ ],
+
+ arduino:[
+  ...range("D",0,13),
+  ...range("A",0,5),
+  "3V3","5V","GND","VIN","SDA","SCL"
+ ],
+
+ esp32:[
+  "3V3","5V","GND",
+  "GPIO2","GPIO4","GPIO5",
+  "GPIO18","GPIO19","GPIO21",
+  "GPIO22","GPIO23","GPIO25",
+  "GPIO26","GPIO27","GPIO32","GPIO33"
+ ],
+
+ esp8266:[
+  "3V3","VIN","GND",
+  ...range("D",0,8),"A0"
+ ],
+
+ pi:[
+  "3V3","5V","GND",
+  ...range("GPIO",0,27)
+ ],
+
+ pico:[
+  "3V3","VBUS","GND",
+  ...range("GP",0,22),
+  "GP26","GP27","GP28"
+ ],
+
+ microbit:[
+  "3V","GND","P0","P1","P2",
+  "P8","P12","P13","P14",
+  "P15","P16","P19","P20"
+ ],
+
+ stm32:[
+  "3V3","5V","GND",
+  ...range("PA",0,10),
+  "PB0","PB1","PB6","PB7"
+ ]
+};
+
+const pi40=[
+ "3V3","5V",
+ "GPIO2","5V",
+ "GPIO3","GND",
+ "GPIO4","GPIO14",
+ "GND","GPIO15",
+ "GPIO17","GPIO18",
+ "GPIO27","GND",
+ "GPIO22","GPIO23",
+ "3V3","GPIO24",
+ "GPIO10","GND",
+ "GPIO9","GPIO25",
+ "GPIO11","GPIO8",
+ "GND","GPIO7",
+ "GPIO0","GPIO1",
+ "GPIO5","GND",
+ "GPIO6","GPIO12",
+ "GPIO13","GND",
+ "GPIO19","GPIO16",
+ "GPIO26","GPIO20",
+ "GND","GPIO21"
+];
+
+/* =========================================
+   COMPONENTS
+========================================= */
+
+const components={
+ Battery:["+","-"],
+ Resistor:["1","2"],
+ LED:["A","K"],
+ Buzzer:["+","-"],
+ Switch:["1","2"],
+ "Push Button":["1","2"],
+ Servo:["VCC","GND","SIG"],
+ "HC-SR04":["VCC","TRIG","ECHO","GND"],
+ PIR:["VCC","OUT","GND"],
+ DHT11:["VCC","DATA","GND"],
+ OLED:["VCC","GND","SDA","SCL"],
+ LDR:["1","2"],
+ Potentiometer:["1","W","2"],
+ "DC Motor":["+","-"],
+ "RGB LED":["R","G","B","GND"],
+ "Reed Switch":["1","2"],
+ Capacitor:["1","2"],
+ Transistor:["B","C","E"],
+ Relay:["VCC","GND","IN"],
+ "7 Segment Display":["A","B","C","D","E","F","G"],
+ "16x2 LCD":["VCC","GND","SDA","SCL"]
+};
+
+/* =========================================
+   ORIGINAL 18 PROJECTS
+========================================= */
+
+const projects=[
+ ["LED Circuit","led",["Resistor","LED"]],
+ ["Buzzer Alarm","buzzer",["Buzzer"]],
+ ["Switch LED","switch",["Switch","Resistor","LED"]],
+ ["Blinking LED","blink",["Resistor","LED"]],
+ ["Traffic Lights","traffic",[
+  "Resistor","LED",
+  "Resistor","LED",
+  "Resistor","LED"
+ ]],
+ ["Ultrasonic Distance","ultrasonic",["HC-SR04"]],
+ ["Servo Control","servo",["Servo"]],
+ ["Motion Alarm","motion",["PIR","Buzzer"]],
+ ["Temperature Monitor","temperature",["DHT11"]],
+ ["OLED Display","oled",["OLED"]],
+ ["Light Sensor","ldr",["LDR","Resistor","LED"]],
+ ["Button Buzzer","button",["Push Button","Buzzer"]],
+ ["DC Motor","motor",["DC Motor"]],
+ ["Potentiometer","pot",["Potentiometer","LED"]],
+ ["RGB LED","rgb",["RGB LED"]],
+ ["Reed Switch Alarm","reed",["Reed Switch","Buzzer"]],
+ ["7 Segment Display","seven",["7 Segment Display"]],
+ ["16x2 LCD","lcd",["16x2 LCD"]]
+];
+
+/* =========================================
+   APPLICATION STATE
+========================================= */
+
+let selectedBoard=boards[0];
+let project=projects[0];
+
+let parts=[];
+let wires=[];
+let steps=[];
+
+let nextId=1;
+let mode="move";
+let first=null;
+let selected=null;
+
+let completed=0;
+let viewStep=0;
+
+let zoom=1;
+let running=false;
+let timer=null;
+
+let history=[];
+let future=[];
+let restoring=false;
+
+let voiceEnabled=true;
+let lastGuideSpeech="";
+
+const stage=$("stage");
+const svg=$("wireLayer");
+
+/* =========================================
+   UTILITIES
+========================================= */
+
+function toast(message){
+ const el=$("toast");
+
+ el.textContent=message;
+ el.style.display="block";
+
+ clearTimeout(toast.timer);
+
+ toast.timer=setTimeout(()=>{
+  el.style.display="none";
+ },3000);
+}
+
+function pinType(name){
+ if(name==="GND"||name==="-")return"ground";
+
+ if([
+  "+","5V","3V3","3V","VIN","VBUS"
+ ].includes(name))return"power";
+
+ if(/^A\d+$/.test(name))return"analog";
+
+ if(["SDA","SCL"].includes(name))return"bus";
+
+ return"";
+}
+
+function boardPins(){
+ return pinSets[selectedBoard[2]]||[];
+}
+
+function getPins(name){
+ return name===selectedBoard[0]?
+  boardPins():
+  (components[name]||[]);
+}
+
+function label(part){
+ const same=parts.filter(p=>p.name===part.name);
+ return same.length===1?
+  part.name:
+  part.name+"#"+(same.indexOf(part)+1);
+}
+
+function findPart(name){
+ return parts.find(p=>label(p)===name);
+}
+
+function firstPart(name){
+ return parts.find(p=>p.name===name);
+}
+
+/* =========================================
+   BOARD SELECTION
+========================================= */
+
+function renderBoards(){
+ const list=$("boardList");
+ const q=$("boardSearch").value.toLowerCase();
+
+ list.innerHTML="";
+
+ boards
+ .filter(b=>b[0].toLowerCase().includes(q))
+ .forEach(board=>{
+  const card=document.createElement("div");
+  card.className="boardCard";
+
+  const icon=document.createElement("div");
+  icon.className="boardIcon";
+  icon.textContent=board[1];
+
+  const title=document.createElement("strong");
+  title.textContent=board[0];
+
+  card.append(icon,title);
+
+  card.onclick=()=>chooseBoard(board);
+
+  list.appendChild(card);
+ });
+}
+
+function chooseBoard(board){
+ selectedBoard=board;
+
+ $("home").style.display="none";
+ $("app").style.display="block";
+
+ startProject();
+
+ unlock("Board Explorer");
+}
+
+function goHome(){
+ stop();
+
+ $("app").style.display="none";
+ $("home").style.display="block";
+}
+
+/* =========================================
+   PIN ELEMENTS
+========================================= */
+
+function makePin(part,name,number=null){
+ const pin=document.createElement("span");
+
+ pin.className="pin "+pinType(name);
+ pin.dataset.pin=name;
+ pin.textContent=name;
+
+ if(number!==null){
+  pin.title="Physical pin "+number+": "+name;
+ }
+
+ pin.onclick=e=>{
+  e.stopPropagation();
+  connect(part,name,number);
+ };
+
+ return pin;
+}
+
+function pinGroup(part,title,names){
+ const group=document.createElement("div");
+ group.className="pinGroup";
+
+ const heading=document.createElement("strong");
+ heading.textContent=title;
+
+ const row=document.createElement("div");
+
+ names.forEach(name=>{
+  row.appendChild(makePin(part,name));
+ });
+
+ group.append(heading,row);
+
+ return group;
+}
+
+/* =========================================
+   PINOUT BELOW EXISTING BOARD
+========================================= */
+
+function buildPinout(part){
+ const box=document.createElement("div");
+ box.className="pinout";
+
+ const title=document.createElement("h4");
+ title.textContent="📍 BOARD PINOUT";
+ box.appendChild(title);
+
+ const type=selectedBoard[2];
+
+ if(type==="basic"){
+  box.appendChild(
+   pinGroup(part,"BATTERY TERMINALS",["+","-"])
+  );
+  return box;
+ }
+
+ if(type==="uno"){
+  box.appendChild(pinGroup(
+   part,"DIGITAL 0–7",range("D",0,7)
+  ));
+
+  box.appendChild(pinGroup(
+   part,"DIGITAL 8–13",range("D",8,13)
+  ));
+
+  box.appendChild(pinGroup(
+   part,"POWER",["RESET","3V3","5V","GND","VIN"]
+  ));
+
+  box.appendChild(pinGroup(
+   part,"ANALOG",range("A",0,5)
+  ));
+
+  box.appendChild(pinGroup(
+   part,"REFERENCE / I²C",["AREF","SDA","SCL"]
+  ));
+
+  return box;
+ }
+
+ if(type==="pi"){
+  const note=document.createElement("small");
+  note.textContent=
+   "40-pin physical header, BCM GPIO labels.";
+  box.appendChild(note);
+
+  const grid=document.createElement("div");
+  grid.className="piGrid";
+
+  pi40.forEach((name,i)=>{
+   const cell=document.createElement("div");
+   cell.className="piCell";
+
+   const number=document.createElement("span");
+   number.className="piNumber";
+   number.textContent=i+1;
+
+   const pin=makePin(part,name,i+1);
+
+   if(i%2===0){
+    cell.append(number,pin);
+   }else{
+    cell.append(pin,number);
+   }
+
+   grid.appendChild(cell);
+  });
+
+  box.appendChild(grid);
+  return box;
+ }
+
+ const note=document.createElement("small");
+ note.textContent=
+  "Simplified logical pins; physical positions are not verified.";
+ box.appendChild(note);
+
+ box.appendChild(pinGroup(
+  part,"AVAILABLE PINS",boardPins()
+ ));
+
+ return box;
+}
+
+/* =========================================
+   BOARD GRAPHICS
+========================================= */
+
+function boardGraphic(part){
+ if(selectedBoard[2]==="basic"){
+  const battery=document.createElement("div");
+  battery.className="batteryGraphic";
+
+  const voltage=document.createElement("b");
+  voltage.textContent=part.voltage+"V";
+
+  const caption=document.createElement("small");
+  caption.textContent="BATTERY";
+
+  battery.append(voltage,caption);
+  return battery;
+ }
+
+ const body=document.createElement("div");
+ body.className="boardBody";
+
+ const usb=document.createElement("div");
+ usb.className="usb";
+ usb.textContent="USB";
+
+ const chip=document.createElement("div");
+ chip.className="chip";
+ chip.textContent=selectedBoard[0];
+
+ body.append(usb,chip);
+
+ return body;
+}
+
+/* =========================================
+   CREATE COMPONENTS
+========================================= */
+
+function addPart(name,record=true,old=null){
+ const isBoard=name===selectedBoard[0];
+
+ const part={
+  id:old?.id??nextId++,
+  name,
+  x:old?.x??(35+(parts.length%4)*440),
+  y:old?.y??(35+Math.floor(parts.length/4)*430),
+  voltage:old?.voltage??9,
+  resistance:old?.resistance??470,
+  color:old?.color??"#ff3333",
+  closed:old?.closed??false
+ };
+
+ nextId=Math.max(nextId,part.id+1);
+
+ const el=document.createElement("div");
+
+ el.className="part"+(isBoard?" board":"");
+ el.style.left=part.x+"px";
+ el.style.top=part.y+"px";
+
+ part.el=el;
+ parts.push(part);
+
+ if(isBoard){
+  el.appendChild(boardGraphic(part));
+
+  if(selectedBoard[2]==="basic"){
+   const select=document.createElement("select");
+
+   [3.3,5,9].forEach(v=>{
+    const option=document.createElement("option");
+    option.value=v;
+    option.textContent=v+"V";
+    select.appendChild(option);
+   });
+
+   select.value=part.voltage;
+
+   select.onchange=()=>{
+    part.voltage=Number(select.value);
+
+    el.querySelector(".batteryGraphic b")
+     .textContent=part.voltage+"V";
+
+    checkpoint();
+    refresh();
+   };
+
+   el.appendChild(select);
+  }
+
+  el.appendChild(buildPinout(part));
+
+ }else{
+  if(name==="LED"){
+   const bulb=document.createElement("div");
+   bulb.className="ledBulb";
+   bulb.style.setProperty("--led-color",part.color);
+   el.appendChild(bulb);
+
+   const color=document.createElement("select");
+
+   [
+    ["Red","#ff3333"],
+    ["Green","#00ff66"],
+    ["Blue","#288cff"],
+    ["Yellow","#ffe600"],
+    ["White","#ffffff"]
+   ].forEach(([label,value])=>{
+    const option=document.createElement("option");
+    option.value=value;
+    option.textContent=label;
+    color.appendChild(option);
+   });
+
+   color.value=part.color;
+
+   color.onchange=()=>{
+    part.color=color.value;
+    bulb.style.setProperty("--led-color",part.color);
+    checkpoint();
+   };
+
+   el.appendChild(color);
+
+  }else if(name==="Resistor"){
+   const graphic=document.createElement("div");
+   graphic.className="resistorGraphic";
+   el.appendChild(graphic);
+
+   const button=document.createElement("button");
+   button.textContent=part.resistance+" Ω";
+
+   button.onclick=()=>{
+    const value=prompt(
+     "Resistance in ohms:",
+     part.resistance
+    );
+
+    if(value===null)return;
+
+    const n=Number(value);
+
+    if(!Number.isFinite(n)||n<1){
+     toast("Invalid resistance.");
+     return;
+    }
+
+    part.resistance=n;
+    button.textContent=n+" Ω";
+
+    checkpoint();
+    refresh();
+   };
+
+   el.appendChild(button);
+
+  }else{
+   const icons={
+    Buzzer:"🔊",
+    Switch:"🔘",
+    "Push Button":"🔘",
+    Servo:"⚙️",
+    "HC-SR04":"📏",
+    PIR:"📡",
+    DHT11:"🌡️",
+    OLED:"🖥️",
+    LDR:"☀️",
+    Potentiometer:"🎚️",
+    "DC Motor":"⚙️",
+    "RGB LED":"🌈",
+    "Reed Switch":"🧲",
+    Capacitor:"🔋",
+    Transistor:"🔌",
+    Relay:"🔘",
+    "7 Segment Display":"8️⃣",
+    "16x2 LCD":"📟"
+   };
+
+   const icon=document.createElement("div");
+   icon.className="componentIcon";
+   icon.textContent=icons[name]||"🔌";
+   el.appendChild(icon);
+  }
+ }
+
+ const title=document.createElement("div");
+ title.className="partTitle";
+ title.textContent=name;
+ el.appendChild(title);
+
+ if(!isBoard){
+  getPins(name).forEach(pin=>{
+   el.appendChild(makePin(part,pin));
+  });
+ }
+
+ if([
+  "Switch","Push Button","Reed Switch"
+ ].includes(name)){
+  const button=document.createElement("button");
+  button.textContent=part.closed?"ON":"OFF";
+
+  button.onclick=()=>{
+   part.closed=!part.closed;
+   button.textContent=part.closed?"ON":"OFF";
+
+   checkpoint();
+   if(running)simulate();
+  };
+
+  el.appendChild(button);
+ }
+
+ el.onclick=e=>{
+  if(e.target.closest(".pin,button,select,input"))return;
+  selectPart(part);
+ };
+
+ el.onpointerdown=e=>{
+  if(mode!=="move")return;
+
+  if(e.target.closest(".pin,button,select,input"))return;
+
+  selectPart(part);
+
+  const startX=e.clientX;
+  const startY=e.clientY;
+  const oldX=part.x;
+  const oldY=part.y;
+
+  let moved=false;
+
+  el.setPointerCapture(e.pointerId);
+
+  el.onpointermove=event=>{
+   moved=true;
+
+   part.x=Math.max(
+    0,oldX+(event.clientX-startX)/zoom
+   );
+
+   part.y=Math.max(
+    0,oldY+(event.clientY-startY)/zoom
+   );
+
+   el.style.left=part.x+"px";
+   el.style.top=part.y+"px";
+
+   drawWires();
+  };
+
+  el.onpointerup=()=>{
+   el.onpointermove=null;
+   if(moved)checkpoint();
+  };
+
+  el.onpointercancel=()=>{
+   el.onpointermove=null;
+  };
+ };
+
+ stage.appendChild(el);
+
+ if(record){
+  checkpoint();
+  refresh();
+ }
+
+ return part;
+}
+
+function selectPart(part){
+ selected=part;
+
+ parts.forEach(p=>{
+  p.el.classList.toggle("selected",p===part);
+ });
+}
+
+function addSelected(){
+ const select=$("componentSelect");
+
+ if(select.value){
+  addPart(select.value);
+ }
+
+ select.value="";
+}
+
+function deleteSelected(){
+ if(!selected)return;
+
+ if(selected.name===selectedBoard[0]){
+  toast("Main board cannot be deleted.");
+  return;
+ }
+
+ stop();
+
+ wires=wires.filter(w=>
+  w.a.part!==selected&&w.b.part!==selected
+ );
+
+ selected.el.remove();
+
+ parts=parts.filter(p=>p!==selected);
+ selected=null;
+
+ recompute();
+ checkpoint();
+ refresh();
+ currentStep();
+}
+
+/* =========================================
+   PROJECT WIRING RECIPES
+========================================= */
+
+function config(){
+ const type=selectedBoard[2];
+
+ const configs={
+  basic:["+","-","+"],
+  uno:["5V","GND","D13"],
+  arduino:["5V","GND","D13"],
+  esp32:["3V3","GND","GPIO2"],
+  esp8266:["3V3","GND","D4"],
+  pi:["3V3","GND","GPIO17"],
+  pico:["3V3","GND","GP15"],
+  microbit:["3V","GND","P0"],
+  stm32:["3V3","GND","PA0"]
+ };
+
+ const [power,ground,signal]=configs[type];
+
+ return{power,ground,signal};
+}
+
+function signalPins(){
+ return boardPins().filter(p=>
+  ![
+   "+","-","5V","3V3","3V",
+   "GND","VIN","VBUS"
+  ].includes(p)
+ );
+}
+
+function makeSteps(){
+ const cfg=config();
+ const board=selectedBoard[0];
+ const signals=signalPins();
+ const result=[];
+
+ const add=(a,ap,b,bp)=>{
+  result.push({a,ap,b,bp});
+ };
+
+ const io=(name,pin,i=0)=>{
+  add(board,signals[i]||cfg.signal,name,pin);
+ };
+
+ const power=(name,pin="VCC")=>{
+  add(board,cfg.power,name,pin);
+ };
+
+ const ground=(name,pin="GND")=>{
+  add(name,pin,board,cfg.ground);
+ };
+
+ const led=(name="LED",resistor="Resistor",i=0)=>{
+  add(
+   board,
+   selectedBoard[2]==="basic"?
+    cfg.power:(signals[i]||cfg.signal),
+   resistor,"1"
+  );
+
+  add(resistor,"2",name,"A");
+  ground(name,"K");
+ };
+
+ switch(project[1]){
+  case "led":
+  case "blink":
+   led();
+   break;
+
+  case "switch":
+   add(
+    board,
+    selectedBoard[2]==="basic"?
+     cfg.power:cfg.signal,
+    "Switch","1"
+   );
+
+   add("Switch","2","Resistor","1");
+   add("Resistor","2","LED","A");
+   ground("LED","K");
+   break;
+
+  case "traffic":
+   for(let i=0;i<3;i++){
+    led(
+     "LED#"+(i+1),
+     "Resistor#"+(i+1),
+     i
+    );
+   }
+   break;
+
+  case "buzzer":
+   io("Buzzer","+");
+   ground("Buzzer","-");
+   break;
+
+  case "button":
+   io("Push Button","1");
+   add("Push Button","2","Buzzer","+");
+   ground("Buzzer","-");
+   break;
+
+  case "ultrasonic":
+   power("HC-SR04");
+   ground("HC-SR04");
+   io("HC-SR04","TRIG",0);
+   io("HC-SR04","ECHO",1);
+   break;
+
+  case "servo":
+   power("Servo");
+   ground("Servo");
+   io("Servo","SIG");
+   break;
+
+  case "motion":
+   power("PIR");
+   ground("PIR");
+   io("PIR","OUT",0);
+   io("Buzzer","+",1);
+   ground("Buzzer","-");
+   break;
+
+  case "temperature":
+   power("DHT11");
+   ground("DHT11");
+   io("DHT11","DATA");
+   break;
+
+  case "oled":
+  case "lcd":{
+   const name=project[1]==="oled"?
+    "OLED":"16x2 LCD";
+
+   const sda=selectedBoard[2]==="uno"?
+    "A4":
+    selectedBoard[2]==="pi"?
+    "GPIO2":signals[0];
+
+   const scl=selectedBoard[2]==="uno"?
+    "A5":
+    selectedBoard[2]==="pi"?
+    "GPIO3":signals[1];
+
+   if(!sda||!scl||sda===scl)break;
+
+   power(name);
+   ground(name);
+   add(board,sda,name,"SDA");
+   add(board,scl,name,"SCL");
+   break;
+  }
+
+  case "ldr":
+   power("LDR","1");
+   io("LDR","2");
+   led("LED","Resistor",1);
+   break;
+
+  case "pot":
+   power("Potentiometer","1");
+   ground("Potentiometer","2");
+   io("Potentiometer","W");
+   io("LED","A",1);
+   ground("LED","K");
+   break;
+
+  case "rgb":
+   io("RGB LED","R",0);
+   io("RGB LED","G",1);
+   io("RGB LED","B",2);
+   ground("RGB LED","GND");
+   break;
+
+  case "reed":
+   io("Reed Switch","1");
+   add("Reed Switch","2","Buzzer","+");
+   ground("Buzzer","-");
+   break;
+
+  case "motor":
+   io("DC Motor","+");
+   ground("DC Motor","-");
+   break;
+
+  case "seven":
+   for(let i=0;i<7;i++){
+    io("7 Segment Display","ABCDEFG"[i],i);
+   }
+   break;
+ }
+
+ return result;
+}
+
+/* =========================================
+   PROJECT INITIALIZATION
+========================================= */
+
+function startProject(){
+ stop();
+
+ project=projects[
+  Number($("projectSelect").value)||0
+ ];
+
+ parts=[];
+ wires=[];
+ steps=[];
+ nextId=1;
+
+ selected=null;
+ first=null;
+
+ completed=0;
+ viewStep=0;
+
+ history=[];
+ future=[];
+
+ stage.querySelectorAll(".part")
+ .forEach(el=>el.remove());
+
+ addPart(selectedBoard[0],false);
+
+ project[2].forEach(name=>{
+  addPart(name,false);
+ });
+
+ steps=makeSteps();
+
+ mode="move";
+ updateModeButtons();
+
+ zoom=1;
+ applyZoom();
+
+ checkpoint();
+ refresh();
+ currentStep(false);
+}
+
+/* =========================================
+   GUIDED WIRING
+========================================= */
+
+function updateModeButtons(){
+ $("moveButton").classList.toggle(
+  "active",mode==="move"
+ );
+
+ $("wireButton").classList.toggle(
+  "active",mode==="wire"
+ );
+}
+
+function setMode(value){
+ mode=value;
+ first=null;
+
+ document.querySelectorAll(".pin.chosen")
+ .forEach(el=>el.classList.remove("chosen"));
+
+ updateModeButtons();
+ currentStep();
+}
+
+function wireMatches(w,s){
+ return(
+  label(w.a.part)===s.a&&
+  w.a.pin===s.ap&&
+  label(w.b.part)===s.b&&
+  w.b.pin===s.bp
+ )||(
+  label(w.b.part)===s.a&&
+  w.b.pin===s.ap&&
+  label(w.a.part)===s.b&&
+  w.a.pin===s.bp
+ );
+}
+
+function hasStep(s){
+ return wires.some(w=>wireMatches(w,s));
+}
+
+function recompute(){
+ completed=0;
+
+ for(const step of steps){
+  if(hasStep(step))completed++;
+  else break;
+ }
+}
+
+function connect(part,pin,number=null){
+ if(mode!=="wire"){
+  toast("Select Wire Mode first.");
+  return;
+ }
+
+ if(!first){
+  first={part,pin,number};
+
+  const candidates=[
+   ...part.el.querySelectorAll(".pin")
+  ].filter(el=>el.dataset.pin===pin);
+
+  if(number!==null){
+   const exact=candidates.find(el=>
+    el.title==="Physical pin "+number+": "+pin
+   );
+   if(exact)exact.classList.add("chosen");
+  }else if(candidates[0]){
+   candidates[0].classList.add("chosen");
+  }
+
+  return;
+ }
+
+ const a=first;
+ first=null;
+
+ document.querySelectorAll(".pin.chosen")
+ .forEach(el=>el.classList.remove("chosen"));
+
+ if(a.part===part&&a.pin===pin)return;
+
+ const candidate={
+  a,
+  b:{part,pin,number},
+  color:$("wireColor").value
+ };
+
+ const expected=steps[completed];
+
+ if(expected&&!wireMatches(candidate,expected)){
+  toast("❌ Wrong pins. Follow the guide.");
+  speak("wrong");
+  return;
+ }
+
+ if(wires.some(w=>
+  w.a.part===a.part&&
+  w.a.pin===a.pin&&
+  w.b.part===part&&
+  w.b.pin===pin
+ ))return;
+
+ wires.push(candidate);
+
+ recompute();
+ checkpoint();
+ refresh();
+ currentStep();
+
+ if(wires.length===1){
+  unlock("First Wire");
+ }
+
+ if(circuitReady()){
+  unlock("Circuit Master");
+ }
+}
+
+function highlightPins(){
+ document.querySelectorAll(".pin.target")
+ .forEach(el=>el.classList.remove("target"));
+
+ const step=steps[completed];
+ if(!step)return;
+
+ [
+  [step.a,step.ap],
+  [step.b,step.bp]
+ ].forEach(([name,pin])=>{
+  const part=findPart(name);
+  if(!part)return;
+
+  part.el.querySelectorAll(".pin")
+   .forEach(el=>{
+    if(el.dataset.pin===pin){
+     el.classList.add("target");
+    }
+   });
+ });
+}
+
+function showStep(index,voice=true){
+ if(!steps.length){
+  $("guideText").textContent=
+   "No guided wiring recipe is available for this project.";
+  return;
+ }
+
+ if(index>=steps.length){
+  $("guideText").textContent=
+   "🏆 Circuit complete! Press Play.";
+
+  lastGuideSpeech="complete";
+ }else{
+  const s=steps[index];
+
+  $("guideText").textContent=
+   "Step "+(index+1)+": Connect "+
+   s.a+" "+s.ap+" to "+
+   s.b+" "+s.bp+".";
+
+  lastGuideSpeech="connect";
+ }
+
+ if(voice)speak(lastGuideSpeech);
+ highlightPins();
+}
+
+function currentStep(voice=true){
+ viewStep=completed;
+ showStep(viewStep,voice);
+}
+
+function previousStep(){
+ viewStep=Math.max(0,viewStep-1);
+ showStep(viewStep);
+}
+
+function nextStep(){
+ viewStep=Math.min(steps.length,viewStep+1);
+ showStep(viewStep);
+}
+
+function circuitReady(){
+ return steps.length>0&&
+  steps.every(hasStep);
+}
+
+function checkCircuit(){
+ const missing=steps.filter(s=>!hasStep(s)).length;
+
+ $("checkResult").textContent=missing?
+  "⚠️ "+missing+" guided connections missing.":
+  "✅ All guided connections completed.";
+
+ toast(missing?
+  "Finish the highlighted connections.":
+  "Circuit check completed.");
+}
+
+/* =========================================
+   DRAW WIRES
+========================================= */
+
+function pinPosition(part,pin,number=null){
+ const matches=[
+  ...part.el.querySelectorAll(".pin")
+ ].filter(el=>el.dataset.pin===pin);
+
+ let el=matches[0];
+
+ if(number!==null){
+  el=matches.find(p=>
+   p.title==="Physical pin "+number+": "+pin
+  )||el;
+ }
+
+ if(!el){
+  return{x:part.x+50,y:part.y+50};
+ }
+
+ return{
+  x:part.x+el.offsetLeft+el.offsetWidth/2,
+  y:part.y+el.offsetTop+el.offsetHeight/2
+ };
+}
+
+function drawWires(){
+ svg.innerHTML="";
+
+ wires.forEach(w=>{
+  const a=pinPosition(
+   w.a.part,w.a.pin,w.a.number
+  );
+
+  const b=pinPosition(
+   w.b.part,w.b.pin,w.b.number
+  );
+
+  const middle=(a.x+b.x)/2;
+
+  const path=document.createElementNS(
+   "http://www.w3.org/2000/svg","path"
+  );
+
+  path.setAttribute(
+   "d",
+   `M${a.x} ${a.y}
+    L${middle} ${a.y}
+    L${middle} ${b.y}
+    L${b.x} ${b.y}`
+  );
+
+  path.setAttribute("stroke",w.color);
+  path.setAttribute("stroke-width","4");
+  path.setAttribute("fill","none");
+
+  svg.appendChild(path);
+ });
+}
+
+/* =========================================
+   ZOOM
+========================================= */
+
+function zoomBy(factor){
+ zoom=Math.max(.4,Math.min(2.5,zoom*factor));
+ applyZoom();
+}
+
+function applyZoom(){
+ stage.style.transform=`scale(${zoom})`;
+}
+
+/* =========================================
+   SIMULATION
+========================================= */
+
+function stop(){
+ running=false;
+
+ clearInterval(timer);
+ timer=null;
+
+ document.querySelectorAll(".ledBulb")
+ .forEach(el=>el.classList.remove("on"));
+
+ $("simControls").innerHTML="";
+}
+
+function lightLED(part,on){
+ if(!part)return;
+
+ const bulb=part.el.querySelector(".ledBulb");
+
+ if(bulb){
+  bulb.classList.toggle("on",on);
+ }
+}
+
+function play(){
+ stop();
+
+ if(!circuitReady()){
+  $("simText").textContent=
+   "⚠️ Complete the guided wiring first.";
+  return;
+ }
+
+ running=true;
+ simulate();
+
+ unlock("Simulation Scientist");
+}
+
+function slider(title,min,max,value,callback){
+ const root=$("simControls");
+ root.innerHTML="";
+
+ const label=document.createElement("span");
+ const input=document.createElement("input");
+
+ input.type="range";
+ input.min=min;
+ input.max=max;
+ input.value=value;
+
+ input.oninput=()=>{
+  label.textContent=title+": "+input.value;
+  callback(Number(input.value));
+ };
+
+ root.append(label,input);
+ input.oninput();
+}
+
+function simulate(){
+ if(!running)return;
+
+ const kind=project[1];
+ const led=firstPart("LED");
+
+ if(["led","switch","blink"].includes(kind)){
+  if(kind==="blink"){
+   let on=false;
+
+   function tick(){
+    on=!on;
+    lightLED(led,on);
+
+    $("simText").textContent=on?
+     "💡 LED ON":"⚫ LED OFF";
+   }
+
+   tick();
+   timer=setInterval(tick,600);
+   return;
+  }
+
+  const on=kind!=="switch"||
+   firstPart("Switch")?.closed;
+
+  lightLED(led,on);
+
+  $("simText").textContent=on?
+   "💡 LED ON":"⚫ LED OFF";
+
+  return;
+ }
+
+ if(kind==="traffic"){
+  const leds=parts.filter(p=>p.name==="LED");
+  let index=0;
+
+  function tick(){
+   leds.forEach((p,i)=>lightLED(p,i===index));
+
+   $("simText").textContent=
+    ["🔴 STOP","🟡 WAIT","🟢 GO"][index];
+
+   index=(index+1)%3;
+  }
+
+  tick();
+  timer=setInterval(tick,1700);
+  return;
+ }
+
+ if(kind==="servo"){
+  slider("Servo angle",0,180,90,v=>{
+   $("simText").textContent=
+    "⚙️ Servo angle: "+v+"°";
+  });
+  return;
+ }
+
+ if(kind==="ultrasonic"){
+  slider("Distance",2,400,50,v=>{
+   $("simText").textContent=
+    "📏 Distance: "+v+" cm";
+  });
+  return;
+ }
+
+ if(kind==="temperature"){
+  slider("Temperature",0,60,28,v=>{
+   $("simText").textContent=
+    "🌡️ Temperature: "+v+"°C";
+  });
+  return;
+ }
+
+ if(["ldr","pot"].includes(kind)){
+  slider("Sensor level",0,100,50,v=>{
+   lightLED(led,kind==="ldr"?v<40:v>0);
+
+   $("simText").textContent=
+    "Sensor level: "+v+"%";
+  });
+  return;
+ }
+
+ if(kind==="motor"){
+  slider("Motor speed",0,100,50,v=>{
+   $("simText").textContent=
+    "⚙️ Motor speed: "+v+"%";
+  });
+  return;
+ }
+
+ if(kind==="oled"||kind==="lcd"){
+  $("simText").textContent=
+   "🖥️ HELLO WORLD";
+  return;
+ }
+
+ if(kind==="buzzer"){
+  $("simText").textContent=
+   "🔊 Virtual buzzer active.";
+  return;
+ }
+
+ if(kind==="rgb"){
+  const rgb=["🔴 RED","🟢 GREEN","🔵 BLUE"];
+  let i=0;
+
+  timer=setInterval(()=>{
+   $("simText").textContent=rgb[i];
+   i=(i+1)%3;
+  },800);
+
+  return;
+ }
+
+ if(kind==="seven"){
+  let count=0;
+
+  timer=setInterval(()=>{
+   $("simText").textContent=
+    "Digital display: "+count;
+   count=(count+1)%10;
+  },700);
+
+  return;
+ }
+
+ $("simText").textContent=
+  "▶ "+project[0]+" virtual demonstration running.";
+}
+
+/* =========================================
+   ELECTRICAL DASHBOARD
+========================================= */
+
+function electricalData(){
+ const resistor=firstPart("Resistor");
+
+ if(!resistor){
+  return"Board: "+selectedBoard[0]+
+   "\nProject: "+project[0]+
+   "\nVirtual educational demonstration.";
+ }
+
+ const cfg=config();
+
+ const voltage=selectedBoard[2]==="basic"?
+  firstPart(selectedBoard[0])?.voltage:
+  ["esp32","esp8266","pi","pico","stm32","microbit"]
+   .includes(selectedBoard[2])?3.3:5;
+
+ const current=Math.max(
+  0,(voltage-2)/resistor.resistance
+ );
+
+ return(
+  "Board: "+selectedBoard[0]+"\n"+
+  "Project: "+project[0]+"\n"+
+  "Example voltage: "+voltage+" V\n"+
+  "Resistance: "+resistor.resistance+" Ω\n"+
+  "Estimated LED current: "+
+  (current*1000).toFixed(2)+" mA\n"+
+  (current>.02?
+   "⚠️ Current may be excessive.\n":"")+
+  "Educational estimate only."
+ );
+}
+
+function refresh(){
+ $("progress").textContent=
+  "Steps: "+completed+"/"+steps.length+
+  " | Wires: "+wires.length;
+
+ $("electrical").textContent=electricalData();
+
+ drawWires();
+ highlightPins();
+ showStats();
+}
+
+/* =========================================
+   AUDIO LANGUAGE GUIDE
+========================================= */
+
+const guideLanguage={
+ "en-US":{
+  connect:(s)=>`Connect ${s.a} pin ${s.ap} to ${s.b} pin ${s.bp}.`,
+  complete:"Excellent! Your circuit is complete.",
+  wrong:"Incorrect connection. Follow the highlighted pins."
+ },
+
+ "ta-IN":{
+  connect:(s)=>`${s.a} இன் ${s.ap} பின்னை ${s.b} இன் ${s.bp} பின்னுடன் இணைக்கவும்.`,
+  complete:"அருமை! உங்கள் சுற்று முடிந்தது.",
+  wrong:"தவறான இணைப்பு."
+ },
+
+ "hi-IN":{
+  connect:(s)=>`${s.a} के पिन ${s.ap} को ${s.b} के पिन ${s.bp} से जोड़ें।`,
+  complete:"बहुत बढ़िया! सर्किट पूरा हो गया।",
+  wrong:"गलत कनेक्शन।"
+ },
+
+ "te-IN":{
+  connect:(s)=>`${s.a} లోని ${s.ap} పిన్‌ను ${s.b} లోని ${s.bp} పిన్‌కు కలపండి.`,
+  complete:"చాలా బాగుంది! సర్క్యూట్ పూర్తయింది.",
+  wrong:"తప్పు కనెక్షన్."
+ },
+
+ "ml-IN":{
+  connect:(s)=>`${s.a} യിലെ ${s.ap} പിൻ ${s.b} യിലെ ${s.bp} പിന്നുമായി ബന്ധിപ്പിക്കുക.`,
+  complete:"സർക്യൂട്ട് പൂർത്തിയായി.",
+  wrong:"തെറ്റായ കണക്ഷൻ."
+ },
+
+ "kn-IN":{
+  connect:(s)=>`${s.a} ನ ${s.ap} ಪಿನ್ ಅನ್ನು ${s.b} ನ ${s.bp} ಪಿನ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ.`,
+  complete:"ಸರ್ಕ್ಯೂಟ್ ಪೂರ್ಣಗೊಂಡಿದೆ.",
+  wrong:"ತಪ್ಪಾದ ಸಂಪರ್ಕ."
+ },
+
+ "fr-FR":{
+  connect:(s)=>`Connectez ${s.ap} de ${s.a} à ${s.bp} de ${s.b}.`,
+  complete:"Excellent ! Circuit terminé.",
+  wrong:"Connexion incorrecte."
+ },
+
+ "es-ES":{
+  connect:(s)=>`Conecta ${s.ap} de ${s.a} con ${s.bp} de ${s.b}.`,
+  complete:"¡Excelente! Circuito completo.",
+  wrong:"Conexión incorrecta."
+ },
+
+ "de-DE":{
+  connect:(s)=>`Verbinde ${s.ap} von ${s.a} mit ${s.bp} von ${s.b}.`,
+  complete:"Ausgezeichnet! Schaltung fertig.",
+  wrong:"Falsche Verbindung."
+ },
+
+ "ja-JP":{
+  connect:(s)=>`${s.a} の ${s.ap} を ${s.b} の ${s.bp} に接続してください。`,
+  complete:"素晴らしい！回路が完成しました。",
+  wrong:"接続が間違っています。"
+ }
+};
+
+function speak(kind){
+ if(!voiceEnabled)return;
+
+ if(!("speechSynthesis" in window))return;
+
+ const lang=$("language").value;
+ const translations=guideLanguage[lang];
+
+ let text="";
+
+ if(kind==="connect"){
+  const step=steps[completed];
+  if(!step)return;
+  text=translations.connect(step);
+ }else{
+  text=translations[kind]||kind;
+ }
+
+ const voices=speechSynthesis.getVoices();
+
+ const voice=voices.find(v=>
+  v.lang.toLowerCase()===lang.toLowerCase()
+ )||voices.find(v=>
+  v.lang.split("-")[0]===lang.split("-")[0]
+ );
+
+ if(!voice){
+  toast("Speech voice not installed for "+lang);
+  return;
+ }
+
+ speechSynthesis.cancel();
+
+ const utterance=new SpeechSynthesisUtterance(text);
+ utterance.voice=voice;
+ utterance.lang=lang;
+ utterance.rate=.9;
+
+ speechSynthesis.speak(utterance);
+}
+
+function changeLanguage(){
+ currentStep(false);
+ toast("Audio language: "+$("language").value);
+}
+
+function toggleVoice(){
+ voiceEnabled=!voiceEnabled;
+
+ $("voiceButton").textContent=voiceEnabled?
+  "🔊 Voice ON":"🔇 Voice OFF";
+
+ if(!voiceEnabled&&"speechSynthesis" in window){
+  speechSynthesis.cancel();
+ }
+}
+
+function repeatGuide(){
+ if(circuitReady()){
+  speak("complete");
+ }else{
+  speak("connect");
+ }
+}
+
+/* =========================================
+   SAVE / LOAD / UNDO
+========================================= */
+
+function snapshot(){
+ return{
+  board:selectedBoard[0],
+  project:projects.indexOf(project),
+
+  parts:parts.map(p=>({
+   id:p.id,
+   name:p.name,
+   x:p.x,
+   y:p.y,
+   voltage:p.voltage,
+   resistance:p.resistance,
+   color:p.color,
+   closed:p.closed
+  })),
+
+  wires:wires.map(w=>({
+   a:w.a.part.id,
+   ap:w.a.pin,
+   an:w.a.number,
+   b:w.b.part.id,
+   bp:w.b.pin,
+   bn:w.b.number,
+   color:w.color
+  }))
+ };
+}
+
+function checkpoint(){
+ if(restoring)return;
+
+ const state=JSON.stringify(snapshot());
+
+ if(history[history.length-1]!==state){
+  history.push(state);
+
+  if(history.length>60)history.shift();
+
+  future=[];
+ }
+}
+
+function restore(data){
+ const board=boards.find(b=>b[0]===data.board);
+
+ if(!board||
+    !Array.isArray(data.parts)||
+    !Array.isArray(data.wires)){
+  throw Error("Invalid circuit data");
+ }
+
+ stop();
+ restoring=true;
+
+ try{
+  selectedBoard=board;
+  project=projects[data.project]||projects[0];
+
+  parts=[];
+  wires=[];
+  nextId=1;
+  selected=null;
+  first=null;
+
+  stage.querySelectorAll(".part")
+   .forEach(el=>el.remove());
+
+  data.parts.forEach(p=>{
+   if(p.name===selectedBoard[0]||
+      components[p.name]){
+    addPart(p.name,false,p);
+   }
+  });
+
+  data.wires.forEach(w=>{
+   const a=parts.find(p=>p.id===w.a);
+   const b=parts.find(p=>p.id===w.b);
+
+   if(!a||!b)return;
+
+   wires.push({
+    a:{part:a,pin:w.ap,number:w.an??null},
+    b:{part:b,pin:w.bp,number:w.bn??null},
+    color:w.color||"#00e5ff"
+   });
+  });
+
+  steps=makeSteps();
+
+  mode=wires.length?"wire":"move";
+  updateModeButtons();
+
+  recompute();
+
+  $("projectSelect").value=
+   projects.indexOf(project);
+
+  $("home").style.display="none";
+  $("app").style.display="block";
+
+  refresh();
+  currentStep(false);
+ }finally{
+  restoring=false;
+ }
+}
+
+function undo(){
+ if(history.length<2)return;
+
+ future.push(history.pop());
+ restore(JSON.parse(history[history.length-1]));
+}
+
+function redo(){
+ if(!future.length)return;
+
+ const state=future.pop();
+ history.push(state);
+
+ restore(JSON.parse(state));
+}
+
+function saveCircuit(){
+ try{
+  localStorage.setItem(
+   "robocad-v22",
+   JSON.stringify(snapshot())
+  );
+
+  toast("💾 Circuit saved!");
+  unlock("Circuit Saver");
+ }catch(e){
+  toast("Browser storage unavailable.");
+ }
+}
+
+function loadCircuit(){
+ try{
+  const text=localStorage.getItem("robocad-v22");
+
+  if(!text){
+   toast("No saved circuit.");
+   return;
+  }
+
+  restore(JSON.parse(text));
+
+  history=[];
+  future=[];
+  checkpoint();
+
+  toast("📂 Circuit loaded!");
+ }catch(e){
+  toast("Could not load circuit.");
+ }
+}
+
+function exportCircuit(){
+ const text=JSON.stringify(snapshot(),null,2);
+
+ const blob=new Blob(
+  [text],
+  {type:"application/json"}
+ );
+
+ const url=URL.createObjectURL(blob);
+
+ const link=document.createElement("a");
+ link.href=url;
+ link.download="ROBO-CAD-CIRCUIT.json";
+ link.click();
+
+ URL.revokeObjectURL(url);
+
+ unlock("Circuit Exporter");
+}
+
+function importCircuit(event){
+ const file=event.target.files[0];
+ if(!file)return;
+
+ const reader=new FileReader();
+
+ reader.onload=()=>{
+  try{
+   restore(JSON.parse(reader.result));
+
+   history=[];
+   future=[];
+   checkpoint();
+
+   toast("Circuit imported!");
+  }catch(e){
+   toast("Invalid circuit file.");
+  }
+ };
+
+ reader.readAsText(file);
+ event.target.value="";
+}
+
+/* =========================================
+   SECRET FEATURES
+========================================= */
+
+let secretInput="";
+
+document.addEventListener("keydown",e=>{
+ if(
+  e.target.matches("input,textarea,select")||
+  e.ctrlKey||e.altKey||e.metaKey
+ )return;
+
+ if(e.key.length!==1)return;
+
+ secretInput=(secretInput+e.key.toUpperCase()).slice(-20);
+
+ if(secretInput.endsWith("ROBO")){
+  showSecrets(true);
+  unlock("Secret Developer");
+  secretInput="";
+ }
+
+ if(secretInput.endsWith("RAINBOW")){
+  activateRainbow();
+  secretInput="";
+ }
+
+ if(secretInput.endsWith("MATRIX")){
+  activateMatrix();
+  secretInput="";
+ }
+});
+
+function showSecrets(force=null){
+ const panel=$("developerPanel");
+
+ const open=force===null?
+  panel.style.display!=="block":force;
+
+ panel.style.display=open?"block":"none";
+
+ if(open){
+  toast("🔐 Developer Mode unlocked!");
+ }
+}
+
+function activateRainbow(){
+ document.body.classList.remove("matrix");
+ document.body.classList.add("rainbow");
+
+ toast("🌈 Rainbow Mode activated!");
+ unlock("Rainbow Hacker");
+}
+
+function activateMatrix(){
+ document.body.classList.remove("rainbow");
+ document.body.classList.add("matrix");
+
+ toast("🟢 Matrix Mode activated!");
+ unlock("Matrix Hacker");
+}
+
+function resetTheme(){
+ document.body.classList.remove("rainbow","matrix");
+ toast("Normal theme restored.");
+}
+
+/* =========================================
+   ACHIEVEMENTS
+========================================= */
+
+let achievements=[];
+
+try{
+ achievements=JSON.parse(
+  localStorage.getItem("robocad-achievements")||"[]"
+ );
+}catch(e){
+ achievements=[];
+}
+
+const allAchievements=[
+ "Explorer",
+ "Board Explorer",
+ "First Wire",
+ "Circuit Master",
+ "Simulation Scientist",
+ "Circuit Saver",
+ "Circuit Exporter",
+ "Secret Developer",
+ "Rainbow Hacker",
+ "Matrix Hacker"
+];
+
+function unlock(name){
+ if(achievements.includes(name))return;
+
+ achievements.push(name);
+
+ try{
+  localStorage.setItem(
+   "robocad-achievements",
+   JSON.stringify(achievements)
+  );
+ }catch(e){}
+
+ toast("🏆 Achievement Unlocked: "+name);
+
+ renderAchievements();
+}
+
+function unlockAllAchievements(){
+ allAchievements.forEach(name=>unlock(name));
+}
+
+function renderAchievements(){
+ const root=$("achievements");
+ root.innerHTML="";
+
+ if(!achievements.length){
+  root.textContent="No achievements yet.";
+  return;
+ }
+
+ achievements.forEach(name=>{
+  const item=document.createElement("span");
+  item.className="achievement";
+  item.textContent="🏆 "+name;
+  root.appendChild(item);
+ });
+}
+
+function showStats(){
+ $("statistics").textContent=
+  "Board: "+selectedBoard[0]+"\n"+
+  "Project: "+project[0]+"\n"+
+  "Components: "+parts.length+"\n"+
+  "Wires: "+wires.length+"\n"+
+  "Guided steps: "+completed+"/"+steps.length+"\n"+
+  "Achievements: "+achievements.length+
+  "/"+allAchievements.length;
+}
+
+/* =========================================
+   INITIALIZE
+========================================= */
+
+projects.forEach((p,i)=>{
+ const option=document.createElement("option");
+
+ option.value=i;
+ option.textContent=p[0];
+
+ $("projectSelect").appendChild(option);
+});
+
+Object.keys(components).forEach(name=>{
+ if(name==="Battery")return;
+
+ const option=document.createElement("option");
+
+ option.value=name;
+ option.textContent=name;
+
+ $("componentSelect").appendChild(option);
+});
+
+renderBoards();
+renderAchievements();
+startIntro();
+
+</script>
+
+</body>
+</html>
